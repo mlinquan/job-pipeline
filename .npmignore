@@ -1,0 +1,16 @@
+node_modules/
+tests/
+.gitignore
+.travis.yml
+circle.yml
+*.log
+.env
+.env.local
+.env.*.local
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+package-lock.json

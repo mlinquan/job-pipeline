@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobPipeline Browser Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #output {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            border-left: 3px solid #ccc;
+        }
+        .log-info {
+            background-color: #e8f4f8;
+            border-left-color: #3498db;
+        }
+        .log-success {
+            background-color: #e8f8e8;
+            border-left-color: #2ecc71;
+        }
+        .log-task {
+            background-color: #fff3cd;
+            border-left-color: #f39c12;
+        }
+        .log-event {
+            background-color: #eaf2f8;
+            border-left-color: #3498db;
+            font-style: italic;
+        }
+        .log-start {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            font-weight: bold;
+        }
+        .log-end {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            font-weight: bold;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-right: 10px;
+        }
+        #status {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-item {
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .status-running {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+    <script src="./dist/index.umd.js"></script>
+</head>
+<body>
+    <h1>JobPipeline Browser Test</h1>
+    
+    <div id="status">
+        <div class="status-item">
+            <strong>Start Time:</strong> <span id="start-time">--</span>
+        </div>
+        <div class="status-item">
+            <strong>Status:</strong> <span id="pipeline-status" class="status-running">Running</span>
+        </div>
+        <div class="status-item">
+            <strong>End Time:</strong> <span id="end-time">--</span>
+        </div>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script>
+        // 获取JobPipeline对象
+        const { constants, PipelineData, JobPipeline } = window.JobPipeline;
+        
+        const outputDiv = document.getElementById('output');
+        const startTimeSpan = document.getElementById('start-time');
+        const endTimeSpan = document.getElementById('end-time');
+        const statusSpan = document.getElementById('pipeline-status');
+        
+        let startTime;
+        
+        // 辅助函数：获取当前时间字符串
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString();
+        }
+        
+        // 辅助函数：在页面上显示输出
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log-entry log-${type}`;
+            
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = `[${getCurrentTime()}]`;
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            
+            div.appendChild(timestamp);
+            div.appendChild(text);
+            outputDiv.appendChild(div);
+            console.log(`[${getCurrentTime()}] ${message}`);
+            
+            // 滚动到底部
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        
+        // 设置开始时间
+        startTime = new Date();
+        startTimeSpan.textContent = startTime.toLocaleTimeString();
+        
+        log('JobPipeline loaded successfully!', 'success');
+        log('Available objects: ' + Object.keys(window.JobPipeline).join(', '), 'info');
+        
+        // 定义任务 - 5个任务，每个任务有不同的延迟
+        const tasks = [
+            async (data) => {
+                log(`Executing Task 1 with data: ${data.data}`, 'task');
+                // 延迟500ms
+                await new Promise(resolve => setTimeout(resolve, 500));
+                return new PipelineData(`${data.data} processed by Task 1`, 'task1');
+            },
+            async (data) => {
+                log(`Executing Task 2 with data: ${data.data}`, 'task');
+                // 延迟800ms
+                await new Promise(resolve => setTimeout(resolve, 800));
+                return new PipelineData(`${data.data} processed by Task 2`, 'task2');
+            },
+            async (data) => {
+                log(`Executing Task 3 with data: ${data.data}`, 'task');
+                // 延迟300ms
+                await new Promise(resolve => setTimeout(resolve, 300));
+                return new PipelineData(`${data.data} processed by Task 3`, 'task3');
+            },
+            async (data) => {
+                log(`Executing Task 4 with data: ${data.data}`, 'task');
+                // 延迟1000ms
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return new PipelineData(`${data.data} processed by Task 4`, 'task4');
+            },
+            async (data) => {
+                log(`Executing Task 5 with data: ${data.data}`, 'task');
+                // 延迟600ms
+                await new Promise(resolve => setTimeout(resolve, 600));
+                return new PipelineData(`${data.data} processed by Task 5`, 'task5');
+            },
+        ];
+        
+        // 创建pipeline实例
+        const jobPipeline = new JobPipeline({ debug: true });
+        
+        // 添加任务
+        tasks.forEach((task, index) => {
+            jobPipeline.addTask(task);
+            log(`Added Task ${index + 1} (will execute with delay)`, 'info');
+        });
+        
+        // 监听事件
+        jobPipeline.on(constants.EVENT_PIPELINE_START, (data) => {
+            log(`🚀 Pipeline started with data: ${data.data}`, 'start');
+        });
+        
+        jobPipeline.on(constants.EVENT_STEP_UPDATE, (data) => {
+            log(`📈 Step updated: ${data.step} with data: ${data.data}`, 'event');
+        });
+        
+        jobPipeline.on(constants.EVENT_COMPLETED, (data) => {
+            const endTime = new Date();
+            endTimeSpan.textContent = endTime.toLocaleTimeString();
+            statusSpan.textContent = 'Completed';
+            statusSpan.className = 'status-completed';
+            
+            const duration = (endTime - startTime) / 1000;
+            
+            log(`🎉 Pipeline completed with final data: ${data.data}`, 'success');
+            log(`⏱️  Total execution time: ${duration.toFixed(2)} seconds`, 'success');
+            log('✅ Browser test passed successfully!', 'success');
+        });
+        
+        jobPipeline.on(constants.EVENT_ERROR, (error) => {
+            log(`❌ Pipeline error: ${error.message}`, 'end');
+        });
+        
+        jobPipeline.on(constants.EVENT_TERMINATED, (error) => {
+            log(`⏹️  Pipeline terminated: ${error.message}`, 'end');
+        });
+        
+        // 执行pipeline
+        log('Starting pipeline execution...', 'info');
+        jobPipeline.executePipeline('initial data').catch(error => {
+            log(`Pipeline failed with error: ${error.message}`, 'end');
+        });
+    </script>
+</body>
+</html>

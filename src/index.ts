@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 
 // 定义常量
 const constants = {
@@ -92,9 +92,9 @@ class JobPipeline extends EventEmitter {
         this.emit(constants.EVENT_COMPLETED, currentData);
         this.log('Pipeline completed successfully.');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.terminate();
-      this.log(`Pipeline execution error: ${error.message}`);
+      this.log(`Pipeline execution error: ${error.message || error}`);
     }
   }
 

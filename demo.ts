@@ -1,22 +1,22 @@
-import { constants, PipelineData, JobPipeline } from './index';
+import { constants, PipelineData, JobPipeline } from './src/index';
 
 // 定义任务
 const tasks = [
-    async (data) => new PipelineData(`${data.data} processed by Task 1`, 'task1'),
-    async (data) => new PipelineData(`${data.data} processed by Task 2`, 'task2'),
+    async (data: any) => new PipelineData(`${data.data} processed by Task 1`, 'task1'),
+    async (data: any) => new PipelineData(`${data.data} processed by Task 2`, 'task2'),
     // 可以添加更多的任务
 ];
 
 // 定义前置中间件
 const preMiddlewares = [
-    async (data) => {
+    async (data: any) => {
         console.log(`Pre-middleware for step ${data.step}:`, data.data);
     },
 ];
 
 // 定义后置中间件
 const postMiddlewares = [
-    async (data) => {
+    async (data: any) => {
         console.log(`Post-middleware for step ${data.step}:`, data.data);
         // 可以在这里添加逻辑来提前终止pipeline
     },
